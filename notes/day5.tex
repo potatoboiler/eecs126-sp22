@@ -1,0 +1,201 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+
+\usepackage{amsmath,textcomp,amssymb,geometry,graphicx,enumerate,amsthm}
+\usepackage{hyperref}
+
+\newcommand{\N}{\mathbb N}
+\newcommand{\Z}{\mathbb Z}
+\newcommand{\Q}{\mathbb Q}
+\newcommand{\R}{\mathbb R}
+
+\newcommand{\E}{\mathbb E}
+
+\DeclareMathOperator{\Geom}{Geom}
+\DeclareMathOperator{\Var}{Var}
+
+\newtheorem{theorem}{Theorem}
+
+\theoremstyle{remark}
+\newtheorem{example}{Example}[section]
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+
+\begin{document}
+
+\section*{Conditional Expectation}
+Note: $P(X = k | Y = m) = P(X = k, Y = m) / P(Y = m)$ (which is as we expect, given the conditional rule).
+Then we have $P_{X|Y}(x|y)$ is called the conditional PMF of $X$ given $Y$.
+
+We have some properties:
+\begin{enumerate}
+    \item $P_{X|Y} (x|y) \geq 0$
+    \item $\sum_x P_{X|Y}(x|y) = \sum_x \frac{P_{X,Y}(x,y)}{P_Y(y)} = 1$
+\end{enumerate}
+
+So we want to find $\E[x|Y=y]$.
+That is, we fix $Y = y$, and then compute probabilities for $x$.
+We have
+\begin{align*}
+    \E[x|Y=y] & = \sum_x x P(X=x | Y=y)
+\end{align*}
+The above number, like any other expectation, is real.
+Then the equation $\E[X|Y]$ is a function of $Y$.
+
+\begin{example}
+    We roll a die $N$ times, where $N$ is a random variable.
+    Then we have
+    \begin{equation*}
+        \begin{cases}
+            N = 1 & \implies \E[X|N=1] = \frac72    \\
+            N = 2 & \implies \E[X|N=2] = 7          \\
+                  & \vdots                          \\
+            N = n & \implies \E[X|N=n] = \frac{7n}2
+        \end{cases}
+    \end{equation*}
+\end{example}
+
+This notion leads us to the \textbf{Law of Iterated Expectation}.
+
+\section*{Law of Iterated Expectation}
+\begin{theorem}
+    \begin{equation*}
+        \E[\E[X|Y]] = \E[f(Y)] = \E[X]
+    \end{equation*}
+\end{theorem}
+\begin{proof}
+    \begin{align*}
+        \E[\E[X|Y]] & = \sum_y \E[X|Y=y] P(Y=y)                 \\
+                    & = \sum_y \sum_x xP(X = x | Y = y)P(Y = y) \\
+                    & = \sum_y \sum_x x P(X = x, Y = y)         \\
+                    & = \sum_x x \sum_y P(X = x, Y = y)         \\
+                    & = \sum_x x P(X = x)
+    \end{align*}
+\end{proof}
+
+Now suppose that in that Example, $N \sim \Geom(p)$.
+We saw that $\E[X|N] = \frac72N$.
+Then we have
+\begin{align*}
+    \E[X] & = \E[\E[X|N]]   \\
+          & = \E[\frac72 N] \\
+          & = \frac72 \E[N] \\
+          & = \frac{7}{2p}
+\end{align*}
+
+\subsection*{Random Walks}
+Suppose that there is a drunkard randomly walking on the integers.
+With equal probability, we increments or decrements his position, i.e. $P(++) = P(--) = \frac12$.
+He begins at the origin, i.e. $x_0 = 0$.
+
+What is $\E[X_n]$, where $X_n$ is the drunkard's location at time $n$?
+
+We solve by letting $X_{n+1} = X_n + 1_+ - 1_-$.
+These latter two terms are indicator variables, with value 1 if the corresponding signed step is taken, and otherwise 0.
+Using linearity of expectation:
+\begin{align*}
+    \E[X_{n+1}]      & = \E[X_n] + \frac12 - \frac12 \\
+                     & = \E[X_n]                     \\
+    \intertext{by induction, we have}
+    \implies \E[X_n] & = 0 \, \forall n
+\end{align*}
+
+What about the variance?
+We may calculate $\E[X_n^2]$ only.
+\begin{align*}
+    P[X_{n+1}^2 = (k+1)^2 | X_n = k] & = P[X_{n+1}^2 = (k-1)^2 | X_n = k] \\ %P(X_{n+1}^2 = (k-1)^2 | ) 
+                                     & = \frac12                          \\
+    \E[X_{n+1}^2 | X_n = k]          & = \frac12(k-1)^2 + \frac12(k+1)^2  \\
+                                     & = k^2 + 1                          \\
+    \implies \E[X_{n+1}^2 | X_n]     & = X_n^2 + 1                        \\
+    \E[\E[X_{n+1}^2 | X_n]]          & = \E[X_n^2 + 1]                    \\
+                                     & = \E[X_n^2] + 1                    \\
+    \E[X_0^2]                        & \implies \E[X_n^2] = n             \\
+    \sigma                           & = \sqrt{n}
+\end{align*}
+
+\section*{Conditional variance}
+Just like we may ask for conditional expectation, we may ask for conditional variance.
+%\begin{definition}
+\begin{equation*}
+    \Var(X|Y=y) = \E[X^2 | Y=y] - (\E[X|Y=y])^2
+\end{equation*}
+%\end{definition}
+The Law of total variance is $\Var(x) = \E[\Var(X|Y)] + \Var[\E[X|Y]]$.
+
+\section*{Continuous random variables}
+% remember to define a questino env
+How might we define probabilities for a continuous sample space?
+Suppose we take $X\sim Unif(0,1)$, then we know that $P(X = 0.4) = 0$.
+This suggests that we need to take sets that are ``legal''.
+Such sets on $\R$ may be ``legal events'' if they are Borel sets.
+These come from countable unions, finite intersections, and countable intersections.
+Then the base sets are of the form $(-\infty, a]$, or $(a,b)$, or $[a, b)$, or their complements.
+In a word, any ``reasonable set'' is OK. %Not my wording!
+Then the PDF (probability density function) is a function for which when we take integrals over reasonable sets, gives us the probability of the corresponding events.
+
+We can say $X$ is a CRV (continuous RV) if 
+\begin{enumerate}
+    \item there exists a non negative function $f_X$ such that $P(X\in B) = \int_B f_X(x) \, dx$.
+    \item $\int_{-\infty}^\infty f_X(x) \, dx = 1$
+\end{enumerate}
+Implications:
+\begin{itemize}
+    \item $P(a \leq X \leq b) = \int_a^b f_X(x) \, dx $
+    \item $P(X=a) = 0$
+    \item $P(X<a) = P(X \leq a)$
+\end{itemize}
+
+And we may relate the PDF to probability in the following way:
+\begin{itemize}
+    \item $P[X\in[x, x+\epsilon]] = \int_x^{x+\epsilon} f_X(t) \, dt \approx f_X(x) \cdot \epsilon$ whenever $\epsilon << 1$. 
+\end{itemize}
+And then this tells us that $f_X(x) \approx \frac{P(X\in [x, x+\epsilon])}{\epsilon}$.
+We call this quantity the ``probability per unit length'', otherwise density. 
+Hence, the namesake.
+
+We attach a warning note to this.
+If we assign $f_X(x) = \begin{cases}
+    \frac{1}{2\sqrt x}; & 0\leq x \leq 1 \\
+    0; &\text{otherwise}
+\end{cases}$, 
+we cannot treat this function as a probability, because of the explosive singularity at $x = 0$.
+
+We may also define the ``CDF'' as $F_X(x) = P(X \leq x)$.
+% If we have $f_X(x) = \lambda e^{-\lambda x}$, then we have $F_X(x) = $
+
+We then define independence for CRVs.
+Namely,
+\begin{definition}
+    CRV's X, Y are independent if $\{X \leq x\}$ and $\{Y \leq y\}$ are independent events for all $x, y\in \R$.
+    In other terms:
+    \begin{equation*}
+        F_{XY}(x, y) = P(X \leq x, Y \leq y) = F_X(x) F_Y(y) 
+    \end{equation*}
+\end{definition}
+\begin{itemize}
+    \item If $X,Y$ are independent, so are $f(X), g(Y)$.
+    \item $\E[X] = \int_{-\infty}^{\infty} xf_X(x)\, dx$. 
+    \item (TSF analogue) $\E[X] = \int_0^\infty[1 - F_X(x)]\, dx$.
+    \item (``Survival function'') is defined as $(1 - F_X(x)) = P(X \geq x)$.
+    \item $\E[g(x)] = \int_{-\infty}^\infty g(x) f_X(x) \, dx$ 
+    \item $\Var(x) = \E[X^2] - (\E[X])^2 = \int_{-\infty}^\infty (x - \E[x])^2 f_X(x) \, dx$.
+    \item %insert analogue of the var(a^2X + b) here.
+\end{itemize}
+
+\subsection*{Expectations of popular CRVs}
+\begin{enumerate}
+    \item Uniform with bounds $a, b$ has $f_X(x) = \frac{1}{b-a}$. 
+    We have $\E[X] = \int_a^b x\frac{1}{b-a}\, dx = \frac{a+b}2$.
+    We have $\Var(x) = \E[X^2] - \E^2[X] = \dots = \frac{(b-a)^2}{12}$
+    \item Exponential lambda (Expo($\lambda$)), with $f_X(x) = \lambda e^{-\lambda x}$.
+    We have $\E[X] = \int_0^\infty \lambda e^{-\lambda x} \, dx = \frac1\lambda$.
+    We have $\Var(X) = \frac{1}{\lambda^2}$.
+    This is a ``memoryless'' analogue of the geometric distribution from the discrete case.
+\end{enumerate}
+
+Exercise: If you start with the memoryless property, you can derive exponentail distribution?
+Also, it is the only continuous distribution with this property. 
+
+\end{document}
